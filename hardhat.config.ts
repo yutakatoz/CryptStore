@@ -6,16 +6,18 @@ import "@typechain/hardhat";
 import "hardhat-deploy";
 import "hardhat-gas-reporter";
 import type { HardhatUserConfig } from "hardhat/config";
-import { vars } from "hardhat/config";
 import "solidity-coverage";
+
+import * as dotenv from "dotenv";
 
 import "./tasks/accounts";
 import "./tasks/FHECounter";
+import "./tasks/CryptStore";
 
-// Run 'npx hardhat vars setup' to see the list of variables that need to be set
+dotenv.config();
 
-const MNEMONIC: string = vars.get("MNEMONIC", "test test test test test test test test test test test junk");
-const INFURA_API_KEY: string = vars.get("INFURA_API_KEY", "zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz");
+const INFURA_API_KEY: string = process.env.INFURA_API_KEY ?? "";
+const PRIVATE_KEY: string = process.env.PRIVATE_KEY ?? "";
 
 const config: HardhatUserConfig = {
   defaultNetwork: "hardhat",
@@ -24,7 +26,7 @@ const config: HardhatUserConfig = {
   },
   etherscan: {
     apiKey: {
-      sepolia: vars.get("ETHERSCAN_API_KEY", ""),
+      sepolia: process.env.ETHERSCAN_API_KEY ?? "",
     },
   },
   gasReporter: {
@@ -34,28 +36,29 @@ const config: HardhatUserConfig = {
   },
   networks: {
     hardhat: {
-      accounts: {
-        mnemonic: MNEMONIC,
-      },
       chainId: 31337,
     },
-    anvil: {
-      accounts: {
-        mnemonic: MNEMONIC,
-        path: "m/44'/60'/0'/0/",
-        count: 10,
-      },
+    localhost: {
+      url: "http://127.0.0.1:8545",
       chainId: 31337,
-      url: "http://localhost:8545",
+      // Hardhat node default accounts (public, for local development only)
+      accounts: [
+        "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80",
+        "0x59c6995e998f97a5a0044966f094538b3f3e6c3a1a4c63db74df34f7a3c5d2d8",
+        "0x5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a",
+        "0x7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6",
+        "0x47e179ec197488593b187f80a00eb0da91f1b9d0b13f8733639f19c30a34926a",
+        "0x8b3a350cf5c34c9194ca3a545d5ad7a1d2f8adbf46a2a1dfe1d6d6f1d0fdbec3",
+        "0x92db14e403b83dfe3df233f83dfa3a0d7096f8d9c562b9d2f6f2a444ef98a329",
+        "0x4bbbf85ce3377467afe5d46f804f221813b2bb87f24d81f60f9b5f1f2b7d2b6f",
+        "0xdbda1821b80551c9d65939329250298aa3472ba22feea921c0cf5d620ea67b97",
+        "0x2a871d0798f97d79848a013d4936a73bf4cc922c825d33c1cf7073dff6f3c6c1",
+      ],
     },
     sepolia: {
-      accounts: {
-        mnemonic: MNEMONIC,
-        path: "m/44'/60'/0'/0/",
-        count: 10,
-      },
       chainId: 11155111,
       url: `https://sepolia.infura.io/v3/${INFURA_API_KEY}`,
+      accounts: PRIVATE_KEY ? [PRIVATE_KEY] : [],
     },
   },
   paths: {
